@@ -1,12 +1,10 @@
-from PySide6.QtCore import QObject, Slot
+# itemfunctions.py
 
-class ItemFunctions(QObject):
-    def __init__(self, directory="."):
-        super().__init__()
-        self.directory = directory
+def add_item(item_text, todo_list):
+    todo_list.append(item_text)
 
-    @Slot(str, result=bool)
-    def addTodoItem(self, todo_text):
+def remove_item(index, todo_list):
+    del todo_list[index]
 
-        print("Todo item added:", todo_text)
-        return True
+def update_item(index, new_text, todo_list):
+    todo_list[index] = new_text

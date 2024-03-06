@@ -1,0 +1,147 @@
+
+<!-- frontend.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        padding: 20px;
+    }
+
+    h1 {
+        color: #f5718a;
+    }
+
+    input[type="text"] {
+        width: 30%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    button {
+        padding: 10px 20px;
+        background-color: #FFC0CB;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #FFB6C1;
+    }
+
+    ul {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    li {
+        background-color: #fff;
+        padding: 10px;
+        margin-bottom: 5px;
+        border-radius: 5px;
+    }
+
+    label {
+        margin-left: 10px;
+    }
+    </style>
+
+</head>
+<body>
+    <h1>Todo App</h1>
+    <input type="text" id="todoInput" placeholder="Enter todo...">
+    <button onclick="addTodo()">Add</button>
+    <button onclick="removeTodo()">Remove</button>
+    <ul id="todoList"></ul>
+
+    <script>
+        // JavaScript
+        // JavaScript kodunuz buraya gelecek
+        const todoInput = document.getElementById('todoInput');
+        const todoList = document.getElementById('todoList');
+
+        function addTodo() {
+            const todoItem = todoInput.value;
+            if (todoItem.trim() !== '') {
+                fetch('/api/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ todo_item: todoItem })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to add todo item');
+                    }
+                    todoInput.value = ''; // Ekleme yapıldıktan sonra input alanını temizle
+                    fetchTodoList(); // Todo listesini güncelle
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        }
+
+        function removeTodo() {
+            const index = document.querySelector('input[name="todo"]:checked').value;
+            fetch('/api/remove', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ index: index })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to remove todo item');
+                }
+                fetchTodoList();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function fetchTodoList() {
+            fetch('/api/list')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch todo list');
+                }
+                return response.json();
+            })
+            .then(data => {
+                renderTodoList(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function renderTodoList(todoList) {
+            todoList.innerHTML = '';
+            todoList.forEach((todo, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <input type="radio" name="todo" value="${index}">
+                    <label>${todo}</label>
+                `;
+                todoList.appendChild(li);
+            });
+        }
+
+        // Sayfa yüklendiğinde todo listesini getir
+        window.onload = fetchTodoList;
+    </script>
+</body>
+</html>
